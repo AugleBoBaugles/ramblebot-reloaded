@@ -125,36 +125,9 @@ public class WordPredictor {
         int low = 0;
         int high = probs.get(word).size() - 1;
         int mid = ((high - low) / 2) + low;
+
+        // tracks closest probability index that is higher than target
         int lowestHigh = high;
-
-        /* 
-             * .1 .2 .5 .8 .9 1
-             */
-            /* target .2
-                0     1     2
-             * .1    .3    1.0
-             *  -     =     +
-             *  -+=
-             */ 
-
-            /* 
-             * target .5
-             * 
-             * 0         1       2       3
-             * .1       .2      .6       1.0
-             * -         =                +
-             *                   -=       +
-             *           +       -=
-             */
-
-             
-            /* target .50
-                0     1     2
-             * .1    .3    1.0
-             *  -     =     +
-             *              -=+
-             *        +     -=
-             */ 
 
         while (!(low > high)){
             // get the middle value
@@ -164,13 +137,13 @@ public class WordPredictor {
             double currProb = currWord.cumulativeProbability();
 
             
-
             // look for matching prob -- get as close to target as possible
             if (currProb == target){
                 return currWord.word();
             } else if (currProb < target) {
                 low = mid + 1;
             } else if (currProb > target){
+                // check if probability is lower than current lowest valid probability
                 if (currProb < probabilities.get(lowestHigh).cumulativeProbability()){
                     lowestHigh = mid;
                 }
