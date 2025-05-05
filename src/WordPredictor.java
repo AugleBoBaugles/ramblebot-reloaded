@@ -119,26 +119,67 @@ public class WordPredictor {
     
         // goal probability 
         double target = rng.nextDouble();
+        List<WordProbability> probabilities = probs.get(word);
 
         // bounds of word array
         int low = 0;
-        int high = probs.get(word).size();
+        int high = probs.get(word).size() - 1;
+        int mid = ((high - low) / 2) + low;
+        int lowestHigh = high;
 
+        /* 
+             * .1 .2 .5 .8 .9 1
+             */
+            /* target .2
+                0     1     2
+             * .1    .3    1.0
+             *  -     =     +
+             *  -+=
+             */ 
 
+            /* 
+             * target .5
+             * 
+             * 0         1       2       3
+             * .1       .2      .6       1.0
+             * -         =                +
+             *                   -=       +
+             *           +       -=
+             */
 
-        while (low < high){
-            int mid = low + (high - low) - low;
+             
+            /* target .50
+                0     1     2
+             * .1    .3    1.0
+             *  -     =     +
+             *              -=+
+             *        +     -=
+             */ 
 
-            WordProbability currWord = probs.get(word).get(mid);
-            double prob = currWord.cumulativeProbability();
+        while (!(low > high)){
+            // get the middle value
+            mid = low + ((high - low / 2));
 
-            if (prob >= target){
+            WordProbability currWord = probabilities.get(mid);
+            double currProb = currWord.cumulativeProbability();
+
+            
+
+            // look for matching prob -- get as close to target as possible
+            if (currProb == target){
                 return currWord.word();
-            } else {
-                low = mid;
+            } else if (currProb < target) {
+                low = mid + 1;
+            } else if (currProb > target){
+                if (currProb < probabilities.get(lowestHigh).cumulativeProbability()){
+                    lowestHigh = mid;
+                }
+                high = mid - 1;
             }
-        }
 
-        return "No word found.";
+        }
+       
+
+        return probabilities.get(lowestHigh).word();
     }
 }
